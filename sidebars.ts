@@ -14,6 +14,7 @@ const sidebars: SidebarsConfig = {
         'product/playback-flow',
         'product/clipping-flow',
         'product/review-flow',
+        'product/watch-to-review-mapping',
       ],
     },
     {
