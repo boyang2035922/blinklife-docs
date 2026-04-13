@@ -12,11 +12,11 @@ const config: Config = {
   },
 
   url: process.env.VERCEL
-    ? 'https://blinklife-docs.vercel.app'
-    : 'https://ellery221holmes.github.io',
+    ? 'https://wiki.blink-life.com'
+    : 'https://boyang2035922.github.io',
   baseUrl: process.env.VERCEL ? '/' : '/blinklife-docs/',
 
-  organizationName: 'Ellery221Holmes',
+  organizationName: 'boyang2035922',
   projectName: 'blinklife-docs',
 
   onBrokenLinks: 'warn',
@@ -39,7 +39,7 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/',
-          editUrl: 'https://github.com/Ellery221Holmes/blinklife-docs/edit/main/',
+          editUrl: 'https://github.com/boyang2035922/blinklife-docs/edit/main/',
         },
         blog: false,
         theme: {
@@ -64,7 +64,7 @@ const config: Config = {
           label: '文档',
         },
         {
-          href: 'https://github.com/Ellery221Holmes/blinklife',
+          href: 'https://github.com/boyang2035922/blinklife-docs',
           label: 'GitHub',
           position: 'right',
         },
@@ -85,7 +85,7 @@ const config: Config = {
           title: '项目',
           items: [
             { label: '官网', href: 'https://blink-life.com' },
-            { label: 'GitHub', href: 'https://github.com/Ellery221Holmes/blinklife' },
+            { label: 'GitHub', href: 'https://github.com/boyang2035922/blinklife-docs' },
           ],
         },
       ],
