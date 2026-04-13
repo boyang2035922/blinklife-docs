@@ -86,6 +86,8 @@ UNIQUE: `(target_type, clip_id)`
 | v11 | +cloud_id, +sync_status |
 | v12 | 新建 favorites + albums 表 |
 | v13 | +is_portrait（两表） |
+| v14 | +is_deleted, +deleted_at（软删除） |
+| v15 | 新建 sessions + sensor_samples + segments + quality_states |
 
 ## 关键查询
 
