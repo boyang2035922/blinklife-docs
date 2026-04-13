@@ -35,6 +35,7 @@ const sidebars: SidebarsConfig = {
         'engineering/cloud-sync-architecture',
         'engineering/state-management',
         'engineering/review-dev-breakdown',
+        'engineering/data-storage-sync',
       ],
     },
     {
