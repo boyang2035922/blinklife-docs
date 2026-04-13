@@ -11,10 +11,8 @@ const config: Config = {
     v4: true,
   },
 
-  url: process.env.VERCEL
-    ? 'https://wiki.blink-life.com'
-    : 'https://boyang2035922.github.io',
-  baseUrl: process.env.VERCEL ? '/' : '/blinklife-docs/',
+  url: 'https://wiki.blink-life.com',
+  baseUrl: '/',
 
   organizationName: 'boyang2035922',
   projectName: 'blinklife-docs',
