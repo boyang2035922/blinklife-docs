@@ -15,6 +15,7 @@ const sidebars: SidebarsConfig = {
         'product/clipping-flow',
         'product/review-flow',
         'product/watch-to-review-mapping',
+        'product/review-briefing',
       ],
     },
     {
@@ -33,6 +34,7 @@ const sidebars: SidebarsConfig = {
         'engineering/database-schema',
         'engineering/cloud-sync-architecture',
         'engineering/state-management',
+        'engineering/review-dev-breakdown',
       ],
     },
     {
