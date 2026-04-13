@@ -68,6 +68,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'testing/test-focus-areas',
         'testing/review-validation-checklist',
+        'testing/device-test-playbook',
       ],
     },
   ],
