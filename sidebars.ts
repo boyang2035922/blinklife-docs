@@ -67,6 +67,7 @@ const sidebars: SidebarsConfig = {
       link: { type: 'generated-index', title: '测试', description: '测试策略和验收清单' },
       items: [
         'testing/test-focus-areas',
+        'testing/review-validation-checklist',
       ],
     },
   ],
