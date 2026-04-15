@@ -1,12 +1,12 @@
 ---
 title: 数据库 Schema
 sidebar_position: 8
-description: "SQLite 本地数据库 v13：5 个核心表 + 13 个版本的增量迁移历史"
+description: "SQLite 本地数据库 v15：9 个核心表 + 15 个版本的增量迁移历史"
 ---
 
 # 数据库 Schema
 
-> 本地 SQLite 数据库当前版本 v13，包含 5 个核心表。通过 sqflite 的 onUpgrade 回调管理增量迁移。
+> 本地 SQLite 数据库当前版本 v15，包含 9 个核心表。通过 sqflite 的 onUpgrade 回调管理增量迁移。
 
 ## 表结构
 

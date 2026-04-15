@@ -102,7 +102,7 @@ File.rename 是原子操作（\<1ms），而后台 Isolate 拷贝可能需要数
 | 类型 | 内容 |
 |------|------|
 | ✅ 已知 | 当前无第三方状态管理框架，使用 ChangeNotifier + ValueNotifier |
-| ✅ 已知 | 数据库版本 v13，包含 5 个核心表 |
+| ✅ 已知 | 数据库版本 v15，包含 9 个核心表 |
 | 💡 假设 | 未来接入 AI 复盘时可能需要独立的 AI Service 层 |
 | ❓ 待确认 | 是否计划引入 Provider 或 Riverpod 统一状态管理 |
 
@@ -111,3 +111,4 @@ File.rename 是原子操作（\<1ms），而后台 Isolate 拷贝可能需要数
 - [状态管理](state-management) — PlaybackSession/ReviewDetailData 双 Model 详解
 - [数据库 Schema](database-schema) — v13 全表定义
 - [时间轴模型](timeline-model) — 最复杂的组件子系统
+- [Studio 桌面端](studio-architecture) — Tauri v2 桌面工具（共享 .blink 解密和 FFmpeg 管线）

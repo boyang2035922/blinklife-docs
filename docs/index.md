@@ -15,13 +15,14 @@ BlinkLife 是一款运动视频打点剪辑应用。用户在运动中通过 BLE
 
 | 属性 | 值 |
 |------|------|
-| 客户端技术栈 | Flutter (Dart ^3.9.0)，iOS + Android 双平台 |
-| 后端技术栈 | NestJS + PostgreSQL (Prisma ORM) |
-| 本地数据库 | SQLite (sqflite)，当前 v13 |
-| 视频处理 | FFmpegKit |
+| 移动客户端 | Flutter (Dart ^3.9.0)，iOS + Android 双平台 |
+| 桌面工具 | Tauri v2 (Rust + React + FFmpeg CLI)，macOS 双架构 |
+| 后端 API | NestJS + PostgreSQL (Prisma ORM) |
+| 本地数据库 | SQLite (sqflite)，当前 v15 |
+| 视频处理 | FFmpegKit (移动端) / FFmpeg CLI (桌面端) |
 | 打点文件格式 | .blink (AES-256-CBC + HMAC-SHA256) |
 | 设计语言 | iOS 26 Liquid Glass |
-| 代码规模 | 18 页面 · 14 服务 · 29 组件 · 20 工具 · 6 模型 |
+| 官网 | Next.js 16 + React 19，Vercel + CVM 双部署 |
 
 ## 文档导航
 
@@ -48,6 +49,7 @@ BlinkLife 是一款运动视频打点剪辑应用。用户在运动中通过 BLE
 | [数据库 Schema](engineering/database-schema) | v13 全表定义 + 迁移历史 |
 | [云同步架构](engineering/cloud-sync-architecture) | JWT 认证 + API 同步 + 游客 claim |
 | [状态管理](engineering/state-management) | PlaybackSession + ReviewDetailData + ChangeNotifier |
+| [Studio 桌面端](engineering/studio-architecture) | Tauri v2 架构 + .blink 解密 + FFmpeg 管线 + 发布 |
 
 ### 设计规范
 

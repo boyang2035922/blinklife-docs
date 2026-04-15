@@ -36,6 +36,7 @@ const sidebars: SidebarsConfig = {
         'engineering/state-management',
         'engineering/review-dev-breakdown',
         'engineering/data-storage-sync',
+        'engineering/studio-architecture',
       ],
     },
     {
