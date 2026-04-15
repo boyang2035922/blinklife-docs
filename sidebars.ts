@@ -37,6 +37,7 @@ const sidebars: SidebarsConfig = {
         'engineering/review-dev-breakdown',
         'engineering/data-storage-sync',
         'engineering/studio-architecture',
+        'engineering/swipe-back-gesture',
       ],
     },
     {

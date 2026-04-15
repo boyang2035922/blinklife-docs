@@ -112,3 +112,4 @@ File.rename 是原子操作（\<1ms），而后台 Isolate 拷贝可能需要数
 - [数据库 Schema](database-schema) — v13 全表定义
 - [时间轴模型](timeline-model) — 最复杂的组件子系统
 - [Studio 桌面端](studio-architecture) — Tauri v2 桌面工具（共享 .blink 解密和 FFmpeg 管线）
+- [右滑返回手势](swipe-back-gesture) — 全屏右滑跟手返回的三层防御体系

@@ -109,7 +109,17 @@ PointerUp → seek(source: seekExternal) + setScrubbing(false)
 
 ## 右滑返回冲突
 
-时间轴的水平拖拽与页面右滑返回手势冲突。解决方案：`_SwipeBackBlocker` 组件（`RawGestureDetector + HorizontalDragGestureRecognizer(touchSlop: 1.0)`）。touchSlop=1 \< 返回手势的 touchSlop=10，抢先赢得手势竞技场。仅在时间轴和筛选标签区域使用。
+时间轴的水平拖拽与页面右滑返回手势冲突。解决方案：`BackGestureExclusion` 排除区声明（`lib/widgets/back_gesture_scope.dart`）。
+
+```dart
+BackGestureExclusion(
+  child: TimelineHub(...), // 或其他需要双向水平拖拽的区域
+)
+```
+
+**原理**：向 `BackGestureController` 注册 GlobalKey，路由层 `_handlePointerDown` 检测到指针落在排除区时不注册 recognizer → 指针不进竞技场 → 时间轴拖拽零干扰。
+
+旧方案（`_SwipeBackBlocker` — touchSlop=1 抢竞技场）已废弃，它是"手势黑洞"会消费所有水平拖拽。
 
 ## 相关文档
 
