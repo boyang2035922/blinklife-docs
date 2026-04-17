@@ -6,6 +6,10 @@ description: "三层 CustomPainter 绘制（片段/进度打点/Thumb）+ 磁吸
 
 # 时间轴模型
 
+:::info 本文档描述 UI 渲染实现（v1）
+Timeline 的**数据合约**定义在 [`spec/timeline-v2.md`](../spec/timeline-v2.md)（Tracks + Events 双层模型）。本文档描述的是回放页上游的**渲染层**——三层 CustomPainter 架构在 v2 下继续生效，仅上游数据源从 v1 `DotRecord[]` 切换为 v2 `Event[]`（兼容映射见 v2 §6.3）。
+:::
+
 > 时间轴是 BlinkLife 回放页的核心可视化组件，采用三层 CustomPainter 架构绘制剪辑片段、进度打点和拖拽手柄，支持磁吸吸附和触觉反馈。
 
 ## 组件树
