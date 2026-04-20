@@ -1,7 +1,7 @@
 ---
 title: 数据模型字典
 sidebar_position: 1
-description: "BlinkLife 6 个核心数据模型（RecordingRecord/ClipRecord/FavoriteRecord/PlaybackSession/ReviewDetailData/UserModel）全字段说明"
+description: "BlinkLife 核心数据模型（RecordingRecord/ClipRecord/FavoriteRecord/PlaybackSession/UserModel/Session/SensorSample）全字段说明"
 ---
 
 # 数据模型字典
@@ -31,6 +31,8 @@ description: "BlinkLife 6 个核心数据模型（RecordingRecord/ClipRecord/Fav
 | cloudId | String? | null | 云端 UUID |
 | syncStatus | int | 0 | 0=未同步, 1=已同步, 2=待更新 |
 | isPortrait | bool | false | 竖版视频标志 |
+| fileUuid | String? | null | `.blink` 文件 UUID v7（Timeline v2 身份），由 `RecordingIdentity.forNew()` 生成 |
+| specVersion | int | 2 | `.blink` 内容版本（2=v2, 3=v3/Tracks+Events） |
 
 ### DotRecord（打点事件）
 
@@ -39,10 +41,14 @@ description: "BlinkLife 6 个核心数据模型（RecordingRecord/ClipRecord/Fav
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | int | 默认=recordingTime.inMilliseconds |
-| action | String | 动作类型 |
+| action | String | 动作类型（语义化 `markerType`，可修改） |
 | timestamp | DateTime | 绝对 UTC 时间 |
 | recordingTime | Duration | 相对录制时间 |
-| inputSource | String | ble_ring / gesture / watch / manual |
+| inputSource | String | `ble_ring` / `screen_tap` / `screen_double_tap` / `crown_cw` / `crown_ccw` / `action_button` / `double_tap` / `gesture` / `manual`（事实不可改） |
+| markerNameSnapshot | String? | 打点时的动作名称快照（映射版本绑定） |
+| mappingVersion | int | 0 | 映射规则版本号 |
+| heartRateSnapshot | int? | 打点瞬间心率快照（来自 Watch） |
+| speedSnapshot | double? | 打点瞬间速度快照（来自 Watch） |
 
 ### RecordingData（JSON 持久化）
 
@@ -57,6 +63,44 @@ description: "BlinkLife 6 个核心数据模型（RecordingRecord/ClipRecord/Fav
 | recordType | int | 录制类型 |
 | alignOffsetMs | int? | 对齐偏移 (ms) |
 | inputSources | `List<String>?` | 输入源列表 |
+| fileUuid | String | UUID v7 身份标识（新建必须） |
+| ownerUserId | String? | 归属用户 UUID v7（登录态） |
+| ownerGuestId | String? | 归属游客 UUID v7（未登录态，登录后 `claimGuestData` 过户） |
+| specVersion | int | 2/3 — Timeline 内容规范版本 |
+| tracks | `List<Track>?` | v3 Tracks 轨道（心率/步数/速度…） |
+| events | `List<Event>?` | v3 Events 列表（打点），与 `legacy.dotRecords` 镜像 |
+
+## Session（Watch 会话）
+
+源文件：`lib/models/session.dart`
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | String | UUID（Watch/手机侧生成，两端一致） |
+| startTime / endTime | DateTime | 会话起止 |
+| sportType | String | 运动类型 |
+| deviceSources | `List<String>` | `['watch']` / `['phone']` / 混合 |
+| status | SessionStatus | active / completed / aborted |
+| recordingId | int? | 关联 `RecordingRecord.id`（独立打点结束时回填） |
+| vo2max | double? | Session 摘要：最大摄氧量（watch 端计算） |
+| lactateThresholdHr | int? | Session 摘要：乳酸阈心率 |
+
+## SensorSample（传感器采样）
+
+源文件：`lib/models/sensor_sample.dart`
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| sessionId | String | 归属 Session |
+| timestamp | DateTime | 采样时刻（Watch 本地时钟） |
+| heartRate | int? | bpm |
+| stepCountIncrement | int? | 增量步数 |
+| distanceIncrement | double? | 增量距离（m） |
+| speed | double? | 瞬时速度（m/s） |
+| caloriesIncrement | double? | 增量卡路里（kcal） |
+| latitude / longitude / altitude | double? | GPS（可缺） |
+
+`WatchCommunicationService._autoStoreSensorBatch` 是持久监听，收到 `sensor_batch` 即写 DB，不依赖 recording_page 在前台。
 
 ## ClipRecord（剪辑记录）
 

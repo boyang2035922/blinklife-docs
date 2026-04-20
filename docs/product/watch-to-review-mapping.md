@@ -8,6 +8,15 @@ description: "定义手表端采集优先级、统一数据模型、复盘页 MV
 
 > 本文档定义 BlinkLife 手表端应采集哪些数据、这些数据如何支撑复盘页、第一版复盘页的能力边界，以及数据缺失时的降级策略。
 
+:::info 实装状态（2026-04-20）
+本文档 A/B 节的"应该做什么"推导保留作为决策背景。当前客户端实装状态：
+- **采集**：HealthKit 6 类已全量接入（心率 / 步数 / 距离 / 卡路里 / 速度 / GPS），`WatchCommunicationService._autoStoreSensorBatch` 持久写 DB。
+- **输入源**：四路六种 — `screen_tap` / `screen_double_tap` / `crown_cw` / `crown_ccw` / `action_button` / `double_tap`。旧命名 `single_press / double_press / long_press` 已不再使用。
+- **两种模式**：远程打点（手机录制中，`sendDot` 即时上行）+ 独立打点（首触自动启动 session，长按结束，`standalone_session` + ACK 同步）。
+- **复盘页 MVP**：总览 + 事件分布 + 心率趋势 + 5 级心率区间 + 步数/卡路里/VO₂max 已实装。
+- **时间戳修复**：远程打点强制使用 Watch 端原始 `timestamp`，手机端 `_onWatchDotEvent` 通过 `overrideTimestamp` 覆盖，避免 WatchConnectivity 批量延迟导致所有点聚集到录制末尾。
+:::
+
 ---
 
 ## A. 产品结论与优先级判断
@@ -16,7 +25,7 @@ description: "定义手表端采集优先级、统一数据模型、复盘页 MV
 
 **结论：复盘页的价值上限 = 底层数据的可信度上限。**
 
-当前手表端仅支持打点事件（single_press/double_press/long_press → 高光/失误/撤销），没有心率、GPS、速度等任何传感器采集。如果直接画复盘页 UI，只能做出一个"打点统计面板"，与现有回放页的 StatsCard 高度重复，无法体现复盘页的独立价值。
+（原始决策背景）当初手表端仅支持打点事件，没有心率、GPS、速度等任何传感器采集。如果直接画复盘页 UI，只能做出一个"打点统计面板"，与现有回放页的 StatsCard 高度重复，无法体现复盘页的独立价值。因此先补齐采集，再做复盘页。截至 2026-04-20，HealthKit 6 类采集已全部落地，见本页顶部"实装状态"。
 
 先定义采集能力，才能确定复盘页到底"有什么数据可以说话"。
 

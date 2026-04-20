@@ -34,14 +34,30 @@ description: "相机录制 + BLE/手表/手势三路打点 + rename 原子保存
 
 ## 打点输入源
 
-| 输入源 | 标识 | 触发方式 |
-|--------|------|---------|
-| BLE 蓝牙指环 | ble_ring | 原生层 MethodChannel 回调 |
-| 手表 | watch | WatchCommunicationService |
-| 屏幕手势 | gesture | 页面滑动/点击 |
-| 手动添加 | manual | 回放页添加（非录制时） |
+| 输入源 | `inputSource` 标识 | 触发方式 |
+|--------|--------------------|----------|
+| BLE 蓝牙指环 | `ble_ring` | 原生层 MethodChannel 回调 |
+| 手表屏幕单击 | `screen_tap` | Watch `onTapGesture` |
+| 手表屏幕双击 | `screen_double_tap` | Watch `onTapGesture(count: 2)` |
+| Digital Crown 顺时针 | `crown_cw` | `digitalCrownRotation` + 300ms 累积防抖 |
+| Digital Crown 逆时针 | `crown_ccw` | 同上，方向由总累积 delta 决定 |
+| Action Button (S9+) | `action_button` | watchOS 系统手势 |
+| Double Tap (S9+) | `double_tap` | watchOS 系统手势 |
+| 屏幕手势 | `gesture` | 录制页页面滑动/点击 |
+| 手动添加 | `manual` | 回放页添加（非录制时） |
 
-所有输入统一由 `DotInputManager` 管理。
+- 所有输入统一由 `DotInputManager` 管理；`inputSource` 是事实（不可改），`markerType` 是解释（可改）。
+- Watch 端打点时间戳必须用 Watch 原始 `Date()` 生成，走 `PhoneCommunicator.sendDot` 的 `timestamp` 字段；手机端 `_onWatchDotEvent` 通过 `overrideTimestamp` 覆盖 `_emitDotEvent` 的 `now`，避免 WatchConnectivity 批量延迟导致所有打点聚集到录制末尾（已修 3b42080）。
+- 录制开始时 `DotInputManager.startRecording(recordingStartTime)` 把手机录制起点注入，之后所有打点的 `recordingTime = watchTimestamp - recordingStartTime`。
+
+## Watch 两种工作模式
+
+| 模式 | 触发条件 | 打点去向 | 说明 |
+|------|---------|---------|------|
+| 远程打点 | 手机录制中（`state.isRecording=true`） | 即时 `sendDot` → 手机 `DotInputManager` → 合并到当前录制 | 录制页 Watch 通信服务监听 |
+| 独立打点 | 手机未录制，Watch 端首触自动启动 | 本地累积 `standaloneDots`，长按结束后 `sendStandaloneSession` 一次性上行，手机侧 `_saveStandaloneSession` 落 `RecordingData`（`recordType=2`）+ ACK | 适合不方便带手机录制的场景 |
+
+独立打点会话走 `transferUserInfo` 可靠传输 + ACK 确认；未收到 ACK 前 Watch 保留 `pending` 副本，防丢失。
 
 ## 录制保存流程
 
