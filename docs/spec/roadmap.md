@@ -10,6 +10,25 @@ description: "Phase 切分 / 跨端落地顺序 / 后端迁移步骤 / 风险降
 >
 > 核心原则：**先过审，再商业化；先兼容，再扩展；先单端，再跨端同步。**
 
+## 实施状态（2026-04-20 更新）
+
+| Phase | 组件 | 状态 |
+|---|---|---|
+| Phase 1 后端 | users/auth_identities/auth_sessions/user_devices/audit_logs/user_profiles 六表 | ✅ 已落地（`account_system_v1_up.sql`） |
+| Phase 1 后端 | `/auth/apple`（JWKS 完整验签）/ `/auth/refresh` / `/account/delete/request\|cancel\|status` | ✅ 已落地 |
+| Phase 1 客户端 | 登录页 Apple 按钮 + 微信 + 游客入口 | ✅ 已落地 |
+| Phase 1 客户端 | `AccountSecurityPage` + 身份绑定/解绑 + 多设备管理 UI | ✅ 已落地 |
+| Phase 1 客户端 | `.blink v3` 文件格式（tracks / events / legacy 镜像） | ✅ 已落地（`FeatureFlags.kBlinkFileV3Enabled=true`） |
+| Phase 1 客户端 | `biometric.heart_rate` 心率轨道接入 | ✅ 已落地 |
+| Phase 2 账号迁移 | 阶段 1 新表 + 阶段 2 双写 + 阶段 3 wx_openid nullable + 阶段 4 refreshToken 切读 + 阶段 5 下线老 refresh_tokens | ✅ 全部完成 |
+| Phase 2 前瞻预埋 | JWT `aud='blinklife'` + `audit_logs.product` 字段 | ✅ 已预埋 |
+| Phase 2 账号注销物理清理 | `AccountCleanupTask @Cron(EVERY_DAY_AT_3AM)` | ✅ 已落地 |
+| Phase 2 业务 | IAP 商品/订单/权益 / 恢复购买 | 🕐 待商务对接 |
+| Phase 3 扩展 | 手机号登录 / `ai.moment` 轨道 payload / 协作采集 | 🕐 未启动 |
+| 提审阻塞项 | iOS Xcode Sign in with Apple capability 配置 / 真机联调 / 隐私政策更新 | 🕐 待人工操作 |
+
+生产部署：`ubuntu@140.143.187.247:/home/ubuntu/blinklife-api`，部署脚本 `deploy.sh`。
+
 ## 0. Phase 切分总览
 
 ### Phase 0：规范评审（本次交付后的 1 - 2 周）
