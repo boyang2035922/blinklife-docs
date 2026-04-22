@@ -1,6 +1,6 @@
 ---
 title: 账号 + Timeline 规范落地路线图
-sidebar_position: 4
+sidebar_position: 5
 description: "Phase 切分 / 跨端落地顺序 / 后端迁移步骤 / 风险降级"
 ---
 
@@ -10,7 +10,7 @@ description: "Phase 切分 / 跨端落地顺序 / 后端迁移步骤 / 风险降
 >
 > 核心原则：**先过审，再商业化；先兼容，再扩展；先单端，再跨端同步。**
 
-## 实施状态（2026-04-20 更新）
+## 实施状态（2026-04-22 更新）
 
 | Phase | 组件 | 状态 |
 |---|---|---|
@@ -26,8 +26,26 @@ description: "Phase 切分 / 跨端落地顺序 / 后端迁移步骤 / 风险降
 | Phase 2 业务 | IAP 商品/订单/权益 / 恢复购买 | 🕐 待商务对接 |
 | Phase 3 扩展 | 手机号登录 / `ai.moment` 轨道 payload / 协作采集 | 🕐 未启动 |
 | 提审阻塞项 | iOS Xcode Sign in with Apple capability 配置 / 真机联调 / 隐私政策更新 | 🕐 待人工操作 |
+| **Identity v2 Phase 1** | user_no + uuid_id + 登录响应去 BigInt | ✅ 已部署 |
+| **Identity v2 Phase 2** | `app_installations` + 安装上下文拦截器 + 客户端 bootstrap | ✅ 已部署 |
+| **Identity v2 Phase 3** | 设备/会话 UUID + JWT `sid` 校验 + `(userId, installationId)` upsert | ✅ 已部署 |
+| **Identity v2 Phase 4** | 云同步按 `file_uuid` 幂等 + `.blink v3 meta.created_by` | ✅ 已部署 |
+| **Identity v2 Phase 5** | `hardware_peripherals` + `hardware_bindings` + HMAC 识别码 hash + 客户端 `PeripheralService` | ✅ 已部署 |
+| **Identity v2 Phase 6** | `device_push_tokens` + 反馈/审计归因 + 客户端 `PushTokenService` | ✅ 已部署 |
 
 生产部署：`ubuntu@140.143.187.247:/home/ubuntu/blinklife-api`，部署脚本 `deploy.sh`。
+
+### Identity v2 部署后遗留项（2026-04-22）
+
+| 项目 | 状态 | 说明 |
+|---|---|---|
+| `api.blinklife.io` HTTPS 握手失败 | 🕐 待修 | 与 Identity v2 无关；LibreSSL alert handshake failure。域名证书 / Nginx SNI 配置待排查。当前客户端走 IP 直连 `140.143.187.247:3000` 可用。 |
+| 客户端推送 SDK 接入 | 🕐 待接入 | `PushTokenService` 骨架已就位；接入 FCM / APNs 时只需调 `registerToken(provider, rawToken)`，logout 路径已串好 `unregisterCurrent()`。 |
+| BLE 指纹 identifier_kind 双平台对齐 | 🕐 待接入 | iOS CoreBluetooth 无 MAC，应传 `identifier_kind='ble_apple_uuid'`（新增枚举）；Android 继续 `ble_mac`。当前 `hardware_type='ble_ring'` 默认推断为 `ble_mac`，iOS 绑定时需显式覆盖，否则会产生独立 peripheral。 |
+| `PERIPHERAL_HASH_KEY` 备份 | ⚠️ 待人工 | 生产 `.env` 已写入 base64 48B key。丢失会让所有已落库的 `identifier_hash` / `token_hash` 失效（无法再匹配已绑定外设 / 已注册推送）。建议纳入运维 secret 备份流程。 |
+| `AuthService` 登录路径 claim 匿名 push token 的行为联调 | 🕐 待联调 | `upsertUserDevice` 内已落地 `updateMany(where: userId=null, installationId match)`；需 E2E 验证 wechat / apple / refresh 三条路径。 |
+| `/internal/users/search` 后台检索 API | 🕐 可选 | plan 里允许先不做前端；若客服需求出现，再补"按 user_no / device_id / installation_id / hardware_id / file_uuid 串联"查询接口。 |
+| Phase 5 code-reviewer 推迟项 | 🕐 可选 | `RecordingData.sourceHardwareIds` 字段存在性 / controller snake_case 命名 / heartbeat 响应 `bound_by_me` — 风格层面，不影响功能。 |
 
 ## 0. Phase 切分总览
 

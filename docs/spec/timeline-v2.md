@@ -1,6 +1,6 @@
 ---
 title: Timeline v2 规范
-sidebar_position: 2
+sidebar_position: 3
 description: "多轨道时间数据标准：Tracks + Events 双层模型 + .blink v3 文件格式 + v2 严格向下兼容"
 ---
 
@@ -217,7 +217,62 @@ description: "多轨道时间数据标准：Tracks + Events 双层模型 + .blin
 - `payload`: `{ "beacon_id": "uuid", "source_device_id": "watch_1" }`
 - 消费端读取后计算 `clock_offsets[]`
 
-### 3.5 `ai.moment`（P2 占位）
+### 3.5 `game.score`（P0：足球；P1+：篮/羽/乒/网扩展）
+
+离散比分事件。手表或手机录制页记分面板触发。
+
+- `type` 枚举：`game.score.update`
+- `payload` schema：
+  ```json
+  {
+    "side": "home",
+    "score_delta": 1,
+    "score_home_after": 1,
+    "score_away_after": 0,
+    "period_index": 0,
+    "sport_type": "足球"
+  }
+  ```
+- `payload.side` ∈ `"home" | "away"` 必填
+- `payload.score_delta` ∈ `+1 | -1`（-1 = 撤销）必填
+- `payload.score_{home,away}_after` 必填：事件发生后的比分，便于前向扫描无状态
+- `payload.period_index` 上半场=0 / 下半场=1（其他运动按自己的分段意义）
+- `payload.sport_type` 必填：跨运动分析锚点
+- `sampling.mode = "discrete"`
+- `source` 典型：`watch`（P0）/ `phone`（P1+ 手机记分面板）
+- 一条 `delta=-1` 之前最近的同 `side` `+1` 视为被撤销，不参与候选高光
+
+### 3.6 `highlight.candidate`（P0）
+
+候选高光（由 ScoreMarkerLinker 基于 `action` + `game.score` 联动生成）。
+
+- `type` 枚举：`highlight.candidate`
+- `payload` schema：
+  ```json
+  {
+    "anchor_event_uuid": "01926f0a-...",
+    "linked_score_event_uuid": "01926f0a-...",
+    "linked_marker_event_uuid": null,
+    "clip_start_offset_ms": -15000,
+    "clip_end_offset_ms": 8000,
+    "status": "candidate",
+    "priority": "normal",
+    "ignored_reason": null,
+    "confirmed_at": null
+  }
+  ```
+- `payload.status` ∈ `"candidate" | "confirmed" | "ignored"`，语义：
+  - `candidate`：记分自动生成，待用户确认
+  - `confirmed`：用户点击"补为高光"后升级；或联动窗口命中打点时直接进入
+  - `ignored`：用户主动忽略 / 被 `score_undo` 自动降级
+- `payload.priority` ∈ `"critical" | "normal"`（P0 固定 `normal`；P1 羽/乒/网的局点/赛点 → `critical`）
+- `payload.clip_*_offset_ms` 由运动类型决定默认值（足球 `-15s/+8s`）
+- `payload.ignored_reason` 可选：`user_ignored` / `score_undo`
+- `source` ∈ `"score_only" | "marker_only" | "linked"`
+- `sampling.mode = "discrete"`
+- **反向回写约束**：当 Candidate 命中 `linked_marker_event_uuid` 时，对应 MarkerEvent 的 `payload.linked_score_event_uuid` **必须**冗余写入同一 UUID，便于单条 Dot 快速查询"对应哪次记分"
+
+### 3.7 `ai.moment`（P2 占位）
 
 AI 复盘候选事件。首发仅预埋结构，模型上线后细化。
 
@@ -225,7 +280,7 @@ AI 复盘候选事件。首发仅预埋结构，模型上线后细化。
 - `payload`: `{ "suggested_type": "action.marker", "suggested_action": "射门", "raw_features": {} }`
 - `confidence` 必填
 
-### 3.6 `sensor.imu`（P2 占位）
+### 3.8 `sensor.imu`（P2 占位）
 
 IMU 传感器流。
 
@@ -233,16 +288,18 @@ IMU 传感器流。
 - `payload`: `{ "ax": 0.1, "ay": 0.2, "az": 9.8, "gx": 0.01, "gy": 0, "gz": 0 }`
 - `sampling.rate_hz` 典型 50-100
 
-### 3.7 `annotation`（P2 占位）
+### 3.9 `annotation`（P2 占位）
 
 事后修正 / 批注。
 
 - `type` 枚举：`annotation.correction` / `annotation.note`
 - `payload`: `{ "target_event_uuid": "...", "correction": {} }` 或 `{ "text": "..." }`
 
-### 3.8 轨道扩展
+### 3.10 轨道扩展
 
 第三方 / 私有轨道使用 **reverse-DNS** 命名（如 `com.ext.golf.swing`）。未知 `kind` 消费端必须保留，渲染时降级为"未知轨道"占位或隐藏。
+
+v1 / v2 客户端读取 v3 文件时会自动 fallback 到 `legacy.*` 扁平镜像（只含 action 轨道），未知 Track 对其不可见，不会导致崩溃。
 
 ## 4. 时间对齐模型
 

@@ -1,6 +1,6 @@
 ---
 title: 账号 ↔ Timeline 衔接协议 v1
-sidebar_position: 3
+sidebar_position: 4
 description: "主账号与 Timeline 数据的归属模型、游客升级协议、云端同步、冲突解决、删号清理"
 ---
 
